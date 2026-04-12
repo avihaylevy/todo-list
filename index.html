@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Todo App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .container { max-width: 500px; margin: 0 auto; padding: 2rem 1rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .header h1 { font-size: 22px; font-weight: 500; }
+    .header p { font-size: 13px; color: #888; margin-top: 4px; }
+    .lang-btn { padding: 6px 14px; border-radius: 8px; border: 0.5px solid #ddd; background: white; cursor: pointer; font-size: 13px; }
+    .lang-btn:hover { background: #f0f0f0; }
+    .input-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+    .input-row input { flex: 1; padding: 0 12px; height: 40px; border-radius: 8px; border: 0.5px solid #ddd; font-size: 14px; background: white; outline: none; }
+    .input-row input:focus { border-color: #888; }
+    .input-row button { height: 40px; padding: 0 18px; border-radius: 8px; border: 0.5px solid #ddd; background: white; font-size: 14px; cursor: pointer; }
+    .input-row button:hover { background: #f0f0f0; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+    .stat { background: white; border-radius: 8px; padding: 12px; text-align: center; border: 0.5px solid #eee; }
+    .stat-num { font-size: 22px; font-weight: 500; }
+    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
+    .section-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .task-list { display: flex; flex-direction: column; gap: 8px; }
+    .task-card { background: white; border: 0.5px solid #eee; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+    .task-card.done { opacity: 0.6; }
+    .check-btn { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ccc; background: transparent; cursor: pointer; flex-shrink: 0; }
+    .check-btn.checked { background: #1D9E75; border-color: #1D9E75; }
+    .task-info { flex: 1; min-width: 0; }
+    .task-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-card.done .task-title { text-decoration: line-through; color: #aaa; }
+    .task-meta { font-size: 11px; color: #aaa; margin-top: 2px; }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; }
+    .badge-pending { background: #FFF3CD; color: #856404; }
+    .badge-done { background: #D4EDDA; color: #155724; }
+    .del-btn { background: transparent; border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px 6px; border-radius: 6px; }
+    .del-btn:hover { color: #E24B4A; background: #fef2f2; }
+    .empty { text-align: center; padding: 2rem; color: #aaa; font-size: 14px; }
+    .error { color: #E24B4A; font-size: 13px; margin-bottom: 8px; min-height: 18px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1 id="title">המשימות שלי</h1>
+      <p id="date-str"></p>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()">EN / עב</button>
+  </div>
+
+  <div class="input-row">
+    <input type="text" id="task-input" placeholder="הוסף משימה חדשה..." />
+    <button onclick="addTask()" id="add-btn">+ הוסף</button>
+  </div>
+  <div class="error" id="error-msg"></div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label" id="label-total">סה"כ</div></div>
+    <div class="stat"><div class="stat-num" id="stat-open">0</div><div class="stat-label" id="label-open">פתוחות</div></div>
+    <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label" id="label-done">בוצעו</div></div>
+  </div>
+
+  <div class="section-label" id="label-tasks">משימות</div>
+  <div class="task-list" id="task-list"></div>
+</div>
+
+<script>
+  let lang = 'he';
+  const t = {
+    he: {
+      title: 'המשימות שלי', placeholder: 'הוסף משימה חדשה...', add: '+ הוסף',
+      total: 'סה"כ', open: 'פתוחות', done: 'בוצעו', tasks: 'משימות',
+      empty: 'אין משימות עדיין', pending: 'ממתין', doneLabel: 'בוצע',
+      errorEmpty: 'לא ניתן להוסיף משימה ריקה'
+    },
+    en: {
+      title: 'My Tasks', placeholder: 'Add a new task...', add: '+ Add',
+      total: 'Total', open: 'Open', done: 'Done', tasks: 'Tasks',
+      empty: 'No tasks yet', pending: 'Pending', doneLabel: 'Done',
+      errorEmpty: 'Task cannot be empty'
+    }
+  };
+
+  function toggleLang() {
+    lang = lang === 'he' ? 'en' : 'he';
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    document.getElementById('title').textContent = t[lang].title;
+    document.getElementById('task-input').placeholder = t[lang].placeholder;
+    document.getElementById('add-btn').textContent = t[lang].add;
+    document.getElementById('label-total').textContent = t[lang].total;
+    document.getElementById('label-open').textContent = t[lang].open;
+    document.getElementById('label-done').textContent = t[lang].done;
+    document.getElementById('label-tasks').textContent = t[lang].tasks;
+    renderTasks(window._tasks || []);
+  }
+
+  function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  async function loadTasks() {
+    const res = await fetch('/tasks');
+    const tasks = await res.json();
+    window._tasks = tasks;
+    renderTasks(tasks);
+  }
+
+  function renderTasks(tasks) {
+    const list = document.getElementById('task-list');
+    const done = tasks.filter(t => t.status === 'Done').length;
+    document.getElementById('stat-total').textContent = tasks.length;
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-open').textContent = tasks.length - done;
+
+    if (tasks.length === 0) {
+      list.innerHTML = `<div class="empty">${t[lang].empty}</div>`;
+      return;
+    }
+
+    list.innerHTML = tasks.map(task => `
+      <div class="task-card ${task.status === 'Done' ? 'done' : ''}">
+        <button class="check-btn ${task.status === 'Done' ? 'checked' : ''}"
+          onclick="markDone(${task.id})"></button>
+        <div class="task-info">
+          <div class="task-title">${task.task}</div>
+          <div class="task-meta">${task.created_at ? formatDate(task.created_at) : ''}</div>
+        </div>
+        <span class="badge ${task.status === 'Done' ? 'badge-done' : 'badge-pending'}">
+          ${task.status === 'Done' ? t[lang].doneLabel : t[lang].pending}
+        </span>
+        <button class="del-btn" onclick="deleteTask(${task.id})">&#x2715;</button>
+      </div>
+    `).join('');
+  }
+
+  async function addTask() {
+    const input = document.getElementById('task-input');
+    const val = input.value.trim();
+    const errEl = document.getElementById('error-msg');
+    if (!val) {
+      errEl.textContent = t[lang].errorEmpty;
+      return;
+    }
+    errEl.textContent = '';
+    await fetch('/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task: val })
+    });
+    input.value = '';
+    loadTasks();
+  }
+
+  async function deleteTask(id) {
+    await fetch(`/tasks/${id}`, { method: 'DELETE' });
+    loadTasks();
+  }
+
+  async function markDone(id) {
+    await fetch(`/tasks/${id}/done`, { method: 'PUT' });
+    loadTasks();
+  }
+
+  document.getElementById('task-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addTask();
+  });
+
+  const now = new Date();
+  document.getElementById('date-str').textContent = now.toLocaleDateString('he-IL', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+
+  loadTasks();
+</script>
+</body>
+</html>
