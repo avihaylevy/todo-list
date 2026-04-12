@@ -34,10 +34,12 @@ pip install -r requirements.txt
 ```
 
 **4. Create a `.env` file**
-POSTGRES_USER=todo_user
+```env
+POSTGRES_USER=your_user
 POSTGRES_PASSWORD=your_password
-POSTGRES_DB=todo_db
-DATABASE_URL=postgresql://todo_user:your_password@localhost:5432/todo_db
+POSTGRES_DB=your_db
+DATABASE_URL=postgresql://your_user:your_password@localhost:5432/your_db
+```
 
 **5. Start the database**
 ```bash
