@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime
+
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
 from database import Base
 
@@ -18,3 +19,9 @@ class Todo(Base):
 
     # Setting the time the taske has being made
     created_at = Column(DateTime, server_default=func.now())
+
+    # Updated at the time the user updates it
+    updated_at = Column(DateTime, onupdate=func.now())
+
+    # Checks if the task was deleted
+    is_deleted = Column(Boolean, default=False)

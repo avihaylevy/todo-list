@@ -5,15 +5,27 @@ from models import Todo
 # Add task function to database
 def add_task(db: Session, task: str):
     new_task = Todo(task=task, status="pending")
+    existing = db.query(Todo).filter(Todo.task == task).first()
+    if existing:
+        return {"error": "Task already exists"}
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
     return new_task
 
 
-# View a task function from database
-def view_task(db: Session):
-    return db.query(Todo).all()
+# View a task function from database, with oprional status filter and pagnation
+def view_task(db: Session, status: str = None, skip: int = 0, limit: int = 10):
+    query = db.query(Todo)
+    if status:
+        query = query.filter(Todo.status == status)
+
+    return query.offset(skip).limit(limit).all()
+
+
+# view a task by id
+def view_task_by_id(db: Session, task_id: int):
+    return db.query(Todo).filter(Todo.id == task_id).first()
 
 
 # Remove task function from db by id

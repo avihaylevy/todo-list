@@ -105,7 +105,7 @@
   }
 
   async function loadTasks() {
-    const res = await fetch('/tasks');
+    const res = await fetch('/todos');
     const tasks = await res.json();
     window._tasks = tasks;
     renderTasks(tasks);
@@ -148,22 +148,29 @@
       return;
     }
     errEl.textContent = '';
-    await fetch('/tasks', {
+   const res = await fetch('/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ task: val })
     });
+    if (!res.ok) {
+    const data = await res.json();
+    errEl.textContent = data.detail;
+    return;
+    }
+    
     input.value = '';
     loadTasks();
-  }
+    
+}
 
   async function deleteTask(id) {
-    await fetch(`/tasks/${id}`, { method: 'DELETE' });
+    await fetch(`/todos/${id}`, { method: 'DELETE' });
     loadTasks();
   }
 
   async function markDone(id) {
-    await fetch(`/tasks/${id}/done`, { method: 'PUT' });
+    await fetch(`/todos/${id}/done`, { method: 'PUT' });
     loadTasks();
   }
 
