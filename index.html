@@ -4,41 +4,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Todo App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #0f0f11; --surface: #1a1a1f; --surface2: #222228; --border: #2e2e36;
+      --text: #e8e8f0; --text-muted: #6b6b7e; --accent: #7c6af7; --accent-dim: rgba(124,106,247,0.15);
+      --low: #3b82f6; --low-bg: rgba(59,130,246,0.12);
+      --medium: #f59e0b; --medium-bg: rgba(245,158,11,0.12);
+      --high: #ef4444; --high-bg: rgba(239,68,68,0.12);
+      --done: #22c55e; --done-bg: rgba(34,197,94,0.12);
+      --overdue: #ef4444; --overdue-bg: rgba(239,68,68,0.06);
+      --radius: 12px; --radius-sm: 8px;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f5f5f5; color: #1a1a1a; }
-    .container { max-width: 500px; margin: 0 auto; padding: 2rem 1rem; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .header h1 { font-size: 22px; font-weight: 500; }
-    .header p { font-size: 13px; color: #888; margin-top: 4px; }
-    .lang-btn { padding: 6px 14px; border-radius: 8px; border: 0.5px solid #ddd; background: white; cursor: pointer; font-size: 13px; }
-    .lang-btn:hover { background: #f0f0f0; }
-    .input-row { display: flex; gap: 8px; margin-bottom: 1.5rem; }
-    .input-row input { flex: 1; padding: 0 12px; height: 40px; border-radius: 8px; border: 0.5px solid #ddd; font-size: 14px; background: white; outline: none; }
-    .input-row input:focus { border-color: #888; }
-    .input-row button { height: 40px; padding: 0 18px; border-radius: 8px; border: 0.5px solid #ddd; background: white; font-size: 14px; cursor: pointer; }
-    .input-row button:hover { background: #f0f0f0; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1.5rem; }
-    .stat { background: white; border-radius: 8px; padding: 12px; text-align: center; border: 0.5px solid #eee; }
-    .stat-num { font-size: 22px; font-weight: 500; }
-    .stat-label { font-size: 12px; color: #888; margin-top: 2px; }
-    .section-label { font-size: 12px; color: #888; margin-bottom: 8px; }
+    body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .container { max-width: 640px; margin: 0 auto; padding: 2rem 1rem; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .lang-btn { padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.2s; }
+    .lang-btn:hover { color: var(--text); border-color: var(--accent); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 11px; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .add-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 1.5rem; }
+    .add-form input[type="text"], .add-form input[type="datetime-local"], .add-form textarea, .add-form select {
+      width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-family: inherit; font-size: 14px; padding: 10px 14px; outline: none;
+      transition: border-color 0.2s; margin-bottom: 10px;
+    }
+    .add-form input:focus, .add-form textarea:focus, .add-form select:focus { border-color: var(--accent); }
+    .add-form textarea { resize: vertical; min-height: 60px; }
+    .add-btn { width: 100%; padding: 11px; border-radius: var(--radius-sm); border: none; background: var(--accent); color: white; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .add-btn:hover { opacity: 0.85; }
+    .error-msg { color: var(--high); font-size: 12px; margin-bottom: 10px; min-height: 16px; }
+    .toolbar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+    .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { color: var(--text); }
+    .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .toolbar-select { padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-family: inherit; font-size: 12px; cursor: pointer; outline: none; }
+    .toolbar-select:focus { border-color: var(--accent); }
+    .section-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
     .task-list { display: flex; flex-direction: column; gap: 8px; }
-    .task-card { background: white; border: 0.5px solid #eee; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
-    .task-card.done { opacity: 0.6; }
-    .check-btn { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #ccc; background: transparent; cursor: pointer; flex-shrink: 0; }
-    .check-btn.checked { background: #1D9E75; border-color: #1D9E75; }
+    .task-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .task-card:hover { border-color: var(--accent); background: var(--surface2); }
+    .task-card.done { opacity: 0.5; }
+    .task-card.overdue { border-color: rgba(239,68,68,0.3); background: var(--overdue-bg); }
+    .check-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
+    .check-btn:hover { border-color: var(--done); }
+    .check-btn.checked { background: var(--done); border-color: var(--done); }
+    .check-btn.checked::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 11px; font-weight: 700; }
     .task-info { flex: 1; min-width: 0; }
-    .task-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .task-card.done .task-title { text-decoration: line-through; color: #aaa; }
-    .task-meta { font-size: 11px; color: #aaa; margin-top: 2px; }
-    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 6px; }
-    .badge-pending { background: #FFF3CD; color: #856404; }
-    .badge-done { background: #D4EDDA; color: #155724; }
-    .del-btn { background: transparent; border: none; cursor: pointer; color: #ccc; font-size: 16px; padding: 4px 6px; border-radius: 6px; }
-    .del-btn:hover { color: #E24B4A; background: #fef2f2; }
-    .empty { text-align: center; padding: 2rem; color: #aaa; font-size: 14px; }
-    .error { color: #E24B4A; font-size: 13px; margin-bottom: 8px; min-height: 18px; }
+    .task-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-card.done .task-title { text-decoration: line-through; color: var(--text-muted); }
+    .task-meta { display: flex; align-items: center; gap: 8px; margin-top: 5px; flex-wrap: wrap; }
+    .task-due { font-size: 11px; }
+    .task-due.overdue { color: var(--overdue); font-weight: 600; }
+    .task-due.soon { color: var(--medium); }
+    .task-due.ok { color: var(--text-muted); }
+    .priority-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .priority-tag.low { background: var(--low-bg); color: var(--low); }
+    .priority-tag.medium { background: var(--medium-bg); color: var(--medium); }
+    .priority-tag.high { background: var(--high-bg); color: var(--high); }
+    .status-tag { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+    .status-tag.pending { background: rgba(124,106,247,0.12); color: var(--accent); }
+    .status-tag.done { background: var(--done-bg); color: var(--done); }
+    .del-btn { background: transparent; border: none; cursor: pointer; color: var(--text-muted); font-size: 16px; padding: 4px 6px; border-radius: 6px; transition: all 0.2s; flex-shrink: 0; }
+    .del-btn:hover { color: var(--high); background: var(--high-bg); }
+    .empty { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 14px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(4px); }
+    .modal-overlay.hidden { display: none; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .modal-close { background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; }
+    .modal-close:hover { color: var(--text); background: var(--surface2); }
+    .modal-field { margin-bottom: 16px; }
+    .modal-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .modal-value { font-size: 14px; color: var(--text); }
+    .modal-value.muted { color: var(--text-muted); }
+    .modal-actions { display: flex; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .modal-actions button { flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-family: inherit; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .modal-actions .btn-done { border-color: var(--done); color: var(--done); }
+    .modal-actions .btn-done:hover { background: var(--done-bg); }
+    .modal-actions .btn-reopen { border-color: var(--accent); color: var(--accent); }
+    .modal-actions .btn-reopen:hover { background: var(--accent-dim); }
+    .modal-actions .btn-delete { border-color: var(--high); color: var(--high); }
+    .modal-actions .btn-delete:hover { background: var(--high-bg); }
+    .modal-actions .btn-soft { border-color: var(--text-muted); }
+    .modal-actions .btn-soft:hover { background: var(--surface); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.4; }
   </style>
 </head>
 <body>
@@ -46,16 +104,10 @@
   <div class="header">
     <div>
       <h1 id="title">המשימות שלי</h1>
-      <p id="date-str"></p>
+      <p class="header-sub" id="date-str"></p>
     </div>
     <button class="lang-btn" onclick="toggleLang()">EN / עב</button>
   </div>
-
-  <div class="input-row">
-    <input type="text" id="task-input" placeholder="הוסף משימה חדשה..." />
-    <button onclick="addTask()" id="add-btn">+ הוסף</button>
-  </div>
-  <div class="error" id="error-msg"></div>
 
   <div class="stats">
     <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label" id="label-total">סה"כ</div></div>
@@ -63,123 +115,386 @@
     <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label" id="label-done">בוצעו</div></div>
   </div>
 
+  <div class="add-form">
+    <div class="error-msg" id="error-msg"></div>
+    <input type="text" id="task-input" placeholder="שם המשימה..." />
+    <textarea id="desc-input" placeholder="תיאור (אופציונלי)..."></textarea>
+    <input type="datetime-local" id="due-input" />
+    <select id="priority-select">
+      <option value="">עדיפות (אופציונלי)</option>
+      <option value="low">🔵 נמוכה</option>
+      <option value="medium">🟡 בינונית</option>
+      <option value="high">🔴 גבוהה</option>
+    </select>
+    <button class="add-btn" onclick="addTask()" id="add-btn">+ הוסף משימה</button>
+  </div>
+
+  <div class="toolbar">
+    <select class="toolbar-select" id="sort-select" onchange="applyFilters()">
+      <option value="created_at">מיון: תאריך יצירה</option>
+      <option value="due_date">מיון: תאריך יעד</option>
+      <option value="task">מיון: אלפביתי</option>
+    </select>
+    <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">הכל</button>
+    <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">פתוחות</button>
+    <button class="filter-btn" id="filter-Done" onclick="setFilter('Done')">בוצעו</button>
+    <button class="filter-btn" id="filter-soon" onclick="setDueSoonFilter()">⏰ עד 3 ימים</button>
+    <select class="toolbar-select" id="priority-filter" onchange="setPriorityFilter(this.value)">
+      <option value="">עדיפות: הכל</option>
+      <option value="low">🔵 נמוכה</option>
+      <option value="medium">🟡 בינונית</option>
+      <option value="high">🔴 גבוהה</option>
+    </select>
+  </div>
+
   <div class="section-label" id="label-tasks">משימות</div>
   <div class="task-list" id="task-list"></div>
 </div>
 
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title"></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
 <script>
   let lang = 'he';
-  const t = {
+
+  const i18n = {
     he: {
-      title: 'המשימות שלי', placeholder: 'הוסף משימה חדשה...', add: '+ הוסף',
-      total: 'סה"כ', open: 'פתוחות', done: 'בוצעו', tasks: 'משימות',
-      empty: 'אין משימות עדיין', pending: 'ממתין', doneLabel: 'בוצע',
-      errorEmpty: 'לא ניתן להוסיף משימה ריקה'
+      title: 'המשימות שלי', placeholder: 'שם המשימה...', descPlaceholder: 'תיאור (אופציונלי)...',
+      add: '+ הוסף משימה', total: 'סה"כ', open: 'פתוחות', done: 'בוצעו', tasks: 'משימות',
+      empty: 'אין משימות עדיין', pending: 'פתוחה', doneLabel: 'בוצע',
+      errorEmpty: 'לא ניתן להוסיף משימה ריקה',
+      pastDate: 'תאריך לא יכול להיות בעבר',
+      futureDate: 'תאריך לא יכול להיות יותר מ-100 שנה קדימה',
+      low: 'נמוכה', medium: 'בינונית', high: 'גבוהה',
+      overdue: '⚠ פג תוקף', createdAt: 'נוצר', dueDate: 'תאריך יעד',
+      description: 'תיאור', priority: 'עדיפות', status: 'סטטוס',
+      markDone: '✓ סמן כבוצע', reopen: '↩ פתח מחדש', softDelete: '🗃 ארכיון', hardDelete: '🗑 מחק',
+      noDesc: 'אין תיאור', noDue: 'אין תאריך יעד', noPriority: 'לא הוגדר',
+      sortCreated: 'מיון: תאריך יצירה', sortDue: 'מיון: תאריך יעד', sortAlpha: 'מיון: אלפביתי',
+      all: 'הכל', filterPriority: 'עדיפות: הכל', priorityOptional: 'עדיפות (אופציונלי)',
+      dueSoon: '⏰ עד 3 ימים'
     },
     en: {
-      title: 'My Tasks', placeholder: 'Add a new task...', add: '+ Add',
-      total: 'Total', open: 'Open', done: 'Done', tasks: 'Tasks',
+      title: 'My Tasks', placeholder: 'Task name...', descPlaceholder: 'Description (optional)...',
+      add: '+ Add Task', total: 'Total', open: 'Open', done: 'Done', tasks: 'Tasks',
       empty: 'No tasks yet', pending: 'Pending', doneLabel: 'Done',
-      errorEmpty: 'Task cannot be empty'
+      errorEmpty: 'Task cannot be empty',
+      pastDate: 'Date cannot be in the past',
+      futureDate: 'Date cannot be more than 100 years in the future',
+      low: 'Low', medium: 'Medium', high: 'High',
+      overdue: '⚠ Overdue', createdAt: 'Created', dueDate: 'Due Date',
+      description: 'Description', priority: 'Priority', status: 'Status',
+      markDone: '✓ Mark Done', reopen: '↩ Reopen', softDelete: '🗃 Archive', hardDelete: '🗑 Delete',
+      noDesc: 'No description', noDue: 'No due date', noPriority: 'Not set',
+      sortCreated: 'Sort: Created', sortDue: 'Sort: Due Date', sortAlpha: 'Sort: A-Z',
+      all: 'All', filterPriority: 'Priority: All', priorityOptional: 'Priority (optional)',
+      dueSoon: '⏰ Due in 3 days'
     }
   };
 
+  function t(key) { return i18n[lang][key] || key; }
+
   function toggleLang() {
     lang = lang === 'he' ? 'en' : 'he';
+    document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
-    document.getElementById('title').textContent = t[lang].title;
-    document.getElementById('task-input').placeholder = t[lang].placeholder;
-    document.getElementById('add-btn').textContent = t[lang].add;
-    document.getElementById('label-total').textContent = t[lang].total;
-    document.getElementById('label-open').textContent = t[lang].open;
-    document.getElementById('label-done').textContent = t[lang].done;
-    document.getElementById('label-tasks').textContent = t[lang].tasks;
+    document.getElementById('title').textContent = t('title');
+    document.getElementById('task-input').placeholder = t('placeholder');
+    document.getElementById('desc-input').placeholder = t('descPlaceholder');
+    document.getElementById('add-btn').textContent = t('add');
+    document.getElementById('label-total').textContent = t('total');
+    document.getElementById('label-open').textContent = t('open');
+    document.getElementById('label-done').textContent = t('done');
+    document.getElementById('label-tasks').textContent = t('tasks');
+    document.getElementById('filter-all').textContent = t('all');
+    document.getElementById('filter-pending').textContent = t('pending');
+    document.getElementById('filter-Done').textContent = t('doneLabel');
+    document.getElementById('filter-soon').textContent = t('dueSoon');
+    const ps = document.getElementById('priority-select');
+    ps.options[0].text = t('priorityOptional');
+    ps.options[1].text = '🔵 ' + t('low');
+    ps.options[2].text = '🟡 ' + t('medium');
+    ps.options[3].text = '🔴 ' + t('high');
+    const pf = document.getElementById('priority-filter');
+    pf.options[0].text = t('filterPriority');
+    pf.options[1].text = '🔵 ' + t('low');
+    pf.options[2].text = '🟡 ' + t('medium');
+    pf.options[3].text = '🔴 ' + t('high');
+    const ss = document.getElementById('sort-select');
+    ss.options[0].text = t('sortCreated');
+    ss.options[1].text = t('sortDue');
+    ss.options[2].text = t('sortAlpha');
     renderTasks(window._tasks || []);
+    document.getElementById('date-str').textContent = new Date().toLocaleDateString(
+      lang === 'he' ? 'he-IL' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' }
+    );
+  }
+
+  let activeFilterStatus = 'all';
+  let activeFilterPriority = null;
+  let activeFilterSoon = false;
+
+  function setFilter(f) {
+    activeFilterStatus = f;
+    ['all','pending','Done'].forEach(x => {
+      document.getElementById('filter-' + x).classList.toggle('active', x === f);
+    });
+    applyFilters();
+  }
+
+  function setPriorityFilter(p) {
+    activeFilterPriority = p || null;
+    applyFilters();
+  }
+
+  function setDueSoonFilter() {
+    activeFilterSoon = !activeFilterSoon;
+    document.getElementById('filter-soon').classList.toggle('active', activeFilterSoon);
+    applyFilters();
+  }
+
+  function applyFilters() {
+    let tasks = window._tasks || [];
+    if (activeFilterStatus !== 'all') tasks = tasks.filter(t => t.status === activeFilterStatus);
+    if (activeFilterPriority) tasks = tasks.filter(t => t.priority === activeFilterPriority);
+    if (activeFilterSoon) tasks = tasks.filter(t => {
+      if (!t.due_date) return false;
+      const diff = (new Date(t.due_date) - new Date()) / (1000 * 60 * 60 * 24);
+      return diff >= 0 && diff <= 3;
+    });
+    const orderBy = document.getElementById('sort-select').value;
+    if (orderBy === 'task') tasks = [...tasks].sort((a, b) => a.task.localeCompare(b.task));
+    else if (orderBy === 'due_date') tasks = [...tasks].sort((a, b) => {
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return new Date(a.due_date) - new Date(b.due_date);
+    });
+    renderTasks(tasks);
   }
 
   function formatDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
+    if (!iso) return null;
+    return new Date(iso).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return null;
+    return new Date(iso).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-US', {
       day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
     });
   }
 
+  function isDueStatus(due_date) {
+    if (!due_date) return null;
+    const diff = (new Date(due_date) - new Date()) / (1000 * 60 * 60 * 24);
+    if (diff < 0) return 'overdue';
+    if (diff <= 3) return 'soon';
+    return 'ok';
+  }
+
   async function loadTasks() {
-    const res = await fetch('/todos');
+    const orderBy = document.getElementById('sort-select')?.value || 'created_at';
+    const res = await fetch(`/todos?order_by=${orderBy === 'task' ? 'created_at' : orderBy}`);
     const tasks = await res.json();
     window._tasks = tasks;
-    renderTasks(tasks);
+    applyFilters();
+    return tasks;
   }
 
   function renderTasks(tasks) {
     const list = document.getElementById('task-list');
-    const done = tasks.filter(t => t.status === 'Done').length;
-    document.getElementById('stat-total').textContent = tasks.length;
+    const allTasks = window._tasks || [];
+    const done = allTasks.filter(t => t.status === 'Done').length;
+    document.getElementById('stat-total').textContent = allTasks.length;
     document.getElementById('stat-done').textContent = done;
-    document.getElementById('stat-open').textContent = tasks.length - done;
+    document.getElementById('stat-open').textContent = allTasks.length - done;
 
     if (tasks.length === 0) {
-      list.innerHTML = `<div class="empty">${t[lang].empty}</div>`;
+      list.innerHTML = `<div class="empty">${t('empty')}</div>`;
       return;
     }
 
-    list.innerHTML = tasks.map(task => `
-      <div class="task-card ${task.status === 'Done' ? 'done' : ''}">
-        <button class="check-btn ${task.status === 'Done' ? 'checked' : ''}"
-          onclick="markDone(${task.id})"></button>
-        <div class="task-info">
-          <div class="task-title">${task.task}</div>
-          <div class="task-meta">${task.created_at ? formatDate(task.created_at) : ''}</div>
-        </div>
-        <span class="badge ${task.status === 'Done' ? 'badge-done' : 'badge-pending'}">
-          ${task.status === 'Done' ? t[lang].doneLabel : t[lang].pending}
-        </span>
-        <button class="del-btn" onclick="deleteTask(${task.id})">&#x2715;</button>
-      </div>
-    `).join('');
+    list.innerHTML = tasks.map(task => {
+      const dueStatus = isDueStatus(task.due_date);
+      const isOverdue = dueStatus === 'overdue' && task.status !== 'Done';
+      const priorityTag = task.priority
+        ? `<span class="priority-tag ${task.priority}">${t(task.priority)}</span>` : '';
+      const dueTag = task.due_date
+        ? `<span class="task-due ${isOverdue ? 'overdue' : dueStatus === 'soon' ? 'soon' : 'ok'}">
+            ${isOverdue ? t('overdue') : formatDate(task.due_date)}
+           </span>` : '';
+      return `
+        <div class="task-card ${task.status === 'Done' ? 'done' : ''} ${isOverdue ? 'overdue' : ''}" onclick="openModal(${task.id})">
+          <button class="check-btn ${task.status === 'Done' ? 'checked' : ''}" onclick="event.stopPropagation(); markDone(${task.id})"></button>
+          <div class="task-info">
+            <div class="task-title">${task.task}</div>
+            <div class="task-meta">${priorityTag}${dueTag}</div>
+          </div>
+          <span class="status-tag ${task.status === 'Done' ? 'done' : 'pending'}">
+            ${task.status === 'Done' ? t('doneLabel') : t('pending')}
+          </span>
+          <button class="del-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
+        </div>`;
+    }).join('');
   }
 
   async function addTask() {
     const input = document.getElementById('task-input');
-    const val = input.value.trim();
+    const desc = document.getElementById('desc-input');
+    const due = document.getElementById('due-input');
     const errEl = document.getElementById('error-msg');
-    if (!val) {
-      errEl.textContent = t[lang].errorEmpty;
-      return;
-    }
+    const val = input.value.trim();
+
+    if (!val) { errEl.textContent = t('errorEmpty'); return; }
     errEl.textContent = '';
-   const res = await fetch('/todos', {
+
+    if (due.value) {
+      const selectedDate = new Date(due.value);
+      const today = new Date();
+      const maxDate = new Date();
+      maxDate.setFullYear(maxDate.getFullYear() + 100);
+      if (selectedDate < today) { errEl.textContent = t('pastDate'); return; }
+      if (selectedDate > maxDate) { errEl.textContent = t('futureDate'); return; }
+    }
+
+    const body = { task: val };
+    if (desc.value.trim()) body.description = desc.value.trim();
+    if (due.value) body.due_date = new Date(due.value).toISOString();
+    const priorityVal = document.getElementById('priority-select').value;
+    if (priorityVal) body.priority = priorityVal;
+
+    const res = await fetch('/todos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ task: val })
+      body: JSON.stringify(body)
     });
+
     if (!res.ok) {
-    const data = await res.json();
-    errEl.textContent = data.detail;
-    return;
+      const data = await res.json();
+      errEl.textContent = data.detail;
+      return;
     }
-    
+
     input.value = '';
+    desc.value = '';
+    due.value = '';
+    document.getElementById('priority-select').value = '';
     loadTasks();
-    
-}
+  }
 
   async function deleteTask(id) {
     await fetch(`/todos/${id}`, { method: 'DELETE' });
+    closeModal();
     loadTasks();
+  }
+
+  async function softDelete(id) {
+    await fetch(`/todos/${id}/soft`, { method: 'DELETE' });
+    closeModal();
+    loadTasks();
+  }
+
+  async function reopenTask(id) {
+    await fetch(`/todos/${id}/reopen`, { method: 'PUT' });
+    await loadTasks();
+    openModal(id);
   }
 
   async function markDone(id) {
     await fetch(`/todos/${id}/done`, { method: 'PUT' });
-    loadTasks();
+    await loadTasks();
+    await new Promise(r => setTimeout(r, 100));
+    openModal(id);
+}
+
+  async function openModal(id) {
+    const res = await fetch(`/todos/${id}`);
+    if (!res.ok) return;
+    const task = await res.json();
+
+    document.getElementById('modal-title').textContent = task.task;
+    const dueStatus = isDueStatus(task.due_date);
+    const isOverdue = dueStatus === 'overdue' && task.status !== 'Done';
+
+    document.getElementById('modal-body').innerHTML = `
+      <div class="modal-field">
+        <div class="modal-label">${t('description')}</div>
+        <div class="modal-value ${!task.description ? 'muted' : ''}">${task.description || t('noDesc')}</div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">${t('status')}</div>
+        <div class="modal-value">
+          <span class="status-tag ${task.status === 'Done' ? 'done' : 'pending'}">
+            ${task.status === 'Done' ? t('doneLabel') : t('pending')}
+          </span>
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">${t('priority')}</div>
+        <div class="modal-value">
+          ${task.priority
+            ? `<span class="priority-tag ${task.priority}">${t(task.priority)}</span>`
+            : `<span class="modal-value muted">${t('noPriority')}</span>`}
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">${t('dueDate')}</div>
+        <div class="modal-value">
+          ${task.due_date
+            ? `<span class="task-due ${isOverdue ? 'overdue' : dueStatus === 'soon' ? 'soon' : 'ok'}">
+                ${isOverdue ? t('overdue') + ' — ' : ''}${formatDate(task.due_date)}
+               </span>`
+            : `<span class="modal-value muted">${t('noDue')}</span>`}
+        </div>
+      </div>
+      <div class="modal-field">
+        <div class="modal-label">${t('createdAt')}</div>
+        <div class="modal-value muted">${formatDateTime(task.created_at)}</div>
+      </div>`;
+
+    document.getElementById('modal-actions').innerHTML = `
+      ${task.status !== 'Done'
+        ? `<button class="btn-done" onclick="markDone(${task.id})">${t('markDone')}</button>`
+        : `<button class="btn-reopen" onclick="reopenTask(${task.id})">${t('reopen')}</button>`}
+      <button class="btn-soft" onclick="softDelete(${task.id})">${t('softDelete')}</button>
+      <button class="btn-delete" onclick="deleteTask(${task.id})">${t('hardDelete')}</button>`;
+
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.add('hidden');
+  }
+
+  function closeModalOutside(e) {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
   }
 
   document.getElementById('task-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTask();
   });
 
-  const now = new Date();
-  document.getElementById('date-str').textContent = now.toLocaleDateString('he-IL', {
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  const todayStr = new Date().toISOString().slice(0, 16);
+  const maxDt = new Date();
+  maxDt.setFullYear(maxDt.getFullYear() + 100);
+  document.getElementById('due-input').min = todayStr;
+  document.getElementById('due-input').max = maxDt.toISOString().slice(0, 16);
+
+  document.getElementById('date-str').textContent = new Date().toLocaleDateString('he-IL', {
     weekday: 'long', day: 'numeric', month: 'long'
   });
 

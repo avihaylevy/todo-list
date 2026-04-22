@@ -25,3 +25,12 @@ class Todo(Base):
 
     # Checks if the task was deleted
     is_deleted = Column(Boolean, default=False)
+
+    # optinal task description, can be null
+    description = Column(String, nullable=True)
+
+    # optional task due date, can be null
+    due_date = Column(DateTime, nullable=True)
+
+    # optional task priority, default is 0
+    priority = Column(String, default="low")
