@@ -1,15 +1,14 @@
-# Todo list
+# Todo List API
 
-A simple task manager API I built to practice Python backend development.
-
-Built with FastAPI and PostgreSQL running in Docker.
+A task manager API I built to practice Python backend development — REST API with filtering, pagination, and soft delete.
 
 ## Stack
 
 - FastAPI + Uvicorn
 - PostgreSQL (Docker)
-- SQLAlchemy + Alembic
+- SQLAlchemy
 - Pydantic
+- pytest
 
 ## Setup
 
@@ -18,14 +17,14 @@ Make sure you have Python 3.11+ and Docker Desktop installed.
 **1. Clone and enter the project**
 ```bash
 git clone https://github.com/avihaylevy/todo-list.git
-cd todo-api
+cd todo-list
 ```
 
 **2. Create a virtual environment**
 ```bash
-python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Mac/Linux
 ```
 
 **3. Install dependencies**
@@ -52,3 +51,9 @@ uvicorn main:app --reload
 ```
 
 Open http://localhost:8000 for the UI or http://localhost:8000/docs for the API.
+
+## Running Tests
+
+```bash
+pytest tests/ -v
+```

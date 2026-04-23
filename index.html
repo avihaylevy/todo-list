@@ -136,7 +136,7 @@
       <option value="task">מיון: אלפביתי</option>
     </select>
     <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">הכל</button>
-    <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">פתוחות</button>
+    <button class="filter-btn" id="filter-pending" onclick="setFilter('Pending')">פתוחות</button>
     <button class="filter-btn" id="filter-Done" onclick="setFilter('Done')">בוצעו</button>
     <button class="filter-btn" id="filter-soon" onclick="setDueSoonFilter()">⏰ עד 3 ימים</button>
     <select class="toolbar-select" id="priority-filter" onchange="setPriorityFilter(this.value)">
@@ -215,7 +215,7 @@
     document.getElementById('label-done').textContent = t('done');
     document.getElementById('label-tasks').textContent = t('tasks');
     document.getElementById('filter-all').textContent = t('all');
-    document.getElementById('filter-pending').textContent = t('pending');
+    document.getElementById('filter-pending').textContent = t('Pending');
     document.getElementById('filter-Done').textContent = t('doneLabel');
     document.getElementById('filter-soon').textContent = t('dueSoon');
     const ps = document.getElementById('priority-select');
@@ -244,9 +244,9 @@
 
   function setFilter(f) {
     activeFilterStatus = f;
-    ['all','pending','Done'].forEach(x => {
-      document.getElementById('filter-' + x).classList.toggle('active', x === f);
-    });
+    document.getElementById('filter-all').classList.toggle('active', f === 'all');
+    document.getElementById('filter-pending').classList.toggle('active', f === 'Pending');
+    document.getElementById('filter-Done').classList.toggle('active', f === 'Done');
     applyFilters();
   }
 
@@ -268,7 +268,7 @@
     if (activeFilterSoon) tasks = tasks.filter(t => {
       if (!t.due_date) return false;
       const diff = (new Date(t.due_date) - new Date()) / (1000 * 60 * 60 * 24);
-      return diff >= 0 && diff <= 3;
+      return diff >= -1 && diff <= 4;
     });
     const orderBy = document.getElementById('sort-select').value;
     if (orderBy === 'task') tasks = [...tasks].sort((a, b) => a.task.localeCompare(b.task));
@@ -334,14 +334,14 @@
             ${isOverdue ? t('overdue') : formatDate(task.due_date)}
            </span>` : '';
       return `
-        <div class="task-card ${task.status === 'Done' ? 'done' : ''} ${isOverdue ? 'overdue' : ''}" onclick="openModal(${task.id})">
+        <div class="task-card ${task.status === 'Done' ? 'Done' : ''} ${isOverdue ? 'overdue' : ''}" onclick="openModal(${task.id})">
           <button class="check-btn ${task.status === 'Done' ? 'checked' : ''}" onclick="event.stopPropagation(); markDone(${task.id})"></button>
           <div class="task-info">
             <div class="task-title">${task.task}</div>
             <div class="task-meta">${priorityTag}${dueTag}</div>
           </div>
-          <span class="status-tag ${task.status === 'Done' ? 'done' : 'pending'}">
-            ${task.status === 'Done' ? t('doneLabel') : t('pending')}
+          <span class="status-tag ${task.status === 'Done' ? 'Done' : 'Pending'}">
+            ${task.status === 'Done' ? t('doneLabel') : t('Pending')}
           </span>
           <button class="del-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
         </div>`;
@@ -381,7 +381,11 @@
 
     if (!res.ok) {
       const data = await res.json();
-      errEl.textContent = data.detail;
+    if (res.status === 409) {
+      errEl.textContent = lang === 'he' ? 'משימה עם שם זה כבר קיימת' : 'Task already exists';
+    } else {
+      errEl.textContent = data.message;
+    }
       return;
     }
 
@@ -434,8 +438,8 @@
       <div class="modal-field">
         <div class="modal-label">${t('status')}</div>
         <div class="modal-value">
-          <span class="status-tag ${task.status === 'Done' ? 'done' : 'pending'}">
-            ${task.status === 'Done' ? t('doneLabel') : t('pending')}
+          <span class="status-tag ${task.status === 'Done' ? 'Done' : 'Pending'}">
+            ${task.status === 'Done' ? t('doneLabel') : t('Pending')}
           </span>
         </div>
       </div>

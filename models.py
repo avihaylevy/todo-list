@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
 from database import Base
+from schemas import Status
 
 
 class Todo(Base):
@@ -15,22 +16,22 @@ class Todo(Base):
     task = Column(String, nullable=False)
 
     # Defualt task status is pending
-    status = Column(String, default="pending")
+    status = Column(String, default=Status.pending, index=True)
 
     # Setting the time the taske has being made
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Updated at the time the user updates it
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Checks if the task was deleted
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False, index=True)
 
     # optinal task description, can be null
     description = Column(String, nullable=True)
 
     # optional task due date, can be null
-    due_date = Column(DateTime, nullable=True)
+    due_date = Column(DateTime, nullable=True, index=True)
 
     # optional task priority, default is 0
-    priority = Column(String, default="low")
+    priority = Column(String, default="low", index=True)

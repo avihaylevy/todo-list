@@ -3,12 +3,15 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from dotenv import load_dotenv
 import os
 
+
 # Loading variables from .env
 load_dotenv()
 
 
 # Get database URL from .env
 DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise ValueError("Database URL is not set")
 
 # Create connection engine
 engine = create_engine(DATABASE_URL)
