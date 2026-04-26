@@ -12,7 +12,7 @@ A task manager API I built to practice Python backend development — REST API w
 
 ## Setup
 
-Make sure you have Python 3.11+ and Docker Desktop installed.
+Make sure you have Python 3.11+ and Docker
 
 **1. Clone and enter the project**
 ```bash

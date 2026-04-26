@@ -31,7 +31,7 @@ class Todo(Base):
     description = Column(String, nullable=True)
 
     # optional task due date, can be null
-    due_date = Column(DateTime, nullable=True, index=True)
+    due_date = Column(DateTime(timezone=True), nullable=True, index=True)
 
     # optional task priority, default is 0
     priority = Column(String, default="low", index=True)

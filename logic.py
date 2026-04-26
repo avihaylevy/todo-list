@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models import Todo
 from datetime import timedelta, datetime, timezone
 from exceptions import TaskAlreadyExistsException, TaskCannotBeEmptyException, TaskNotFoundException
-from schemas import Status
+from schemas import Status, Priority
 import logging
 
 
@@ -10,13 +10,24 @@ logger = logging.getLogger(__name__)
 
 
 # Add task function to database
-def add_task(db: Session, task: str, description: str | None = None, due_date: str | None = None, priority: str | None = None):
+def add_task(
+        db: Session,
+        task: str,
+        description: str | None = None,
+        due_date: datetime | None = None,
+        priority: Priority | None = None):
+
     task = task.strip()
     existing = db.query(Todo).filter(Todo.task == task).first()
     if existing:
         raise TaskAlreadyExistsException()
-    new_task = Todo(task=task, status=Status.pending,
-                    description=description, due_date=due_date, priority=priority)
+    new_task = Todo(
+        task=task,
+        status=Status.pending,
+        description=description,
+        due_date=due_date,
+        priority=priority)
+
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
@@ -25,8 +36,16 @@ def add_task(db: Session, task: str, description: str | None = None, due_date: s
 
 
 # View a task function from database, with oprional status filter and pagnation
-def view_task(db: Session, status: str = None, after_id: int = 0, limit: int = 10, order_by: str = "created_at",
-              priority: str = None, due_date: datetime | None = None, due_soon: bool = False, is_deleted: bool = False):
+def view_task(
+        db: Session,
+        status: str = None,
+        after_id: int = 0,
+        limit: int = 10,
+        order_by: str = "created_at",
+        priority: str = None,
+        due_date: datetime | None = None,
+        due_soon: bool = False,
+        is_deleted: bool = False):
     query = db.query(Todo)
     if status:
         query = query.filter(Todo.status == status)
@@ -74,8 +93,13 @@ def mark_done(db: Session, task_id: int):
 
 
 # Update a task by id, only fields that are sent will be updated
-def update_task(db: Session, task_id: int, task: str | None = None, description: str | None = None,
-                due_date: datetime | None = None, priority: str | None = None):
+def update_task(
+        db: Session,
+        task_id: int,
+        task: str | None = None,
+        description: str | None = None,
+        due_date: datetime | None = None,
+        priority: str | None = None):
     existing_task = db.query(Todo).filter(Todo.id == task_id).first()
     if not existing_task:
         raise TaskNotFoundException()

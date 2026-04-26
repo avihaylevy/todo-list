@@ -4,31 +4,36 @@ from database import Base, get_db
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from fastapi.testclient import TestClient
-import sys
-import os
-sys.path.insert(0, os.path.dirname(__file__))
+from sqlalchemy.pool import StaticPool
 
 
-SQLALCHEMY_TEST_URL = "sqlite:///./test.db"
-
-engine = create_engine(SQLALCHEMY_TEST_URL, connect_args={
-                       "check_same_thread": False})
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine)
+@pytest.fixture(scope="session")
+def engine():
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool)
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    Base.metadata.drop_all(bind=engine)
 
 
 @pytest.fixture()
-def client():
-    Base.metadata.create_all(bind=engine)
+def db_session(engine):
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = sessionmaker(bind=connection)()
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
+
+@pytest.fixture()
+def client(db_session):
     def override_get_db():
-        db = TestingSessionLocal()
-        try:
-            yield db
-        finally:
-            db.close()
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
-
-    Base.metadata.drop_all(bind=engine)
+    app.dependency_overrides.clear()

@@ -61,5 +61,5 @@ class ResponseMessage(BaseModel):
 
 
 class Status(str, Enum):
-    pending = "Pending"
-    done = "Done"
+    pending = "pending"
+    done = "done"
