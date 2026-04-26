@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.sql import func
 from database import Base
-from schemas import Status
+from schemas import Status, Priority
 
 
 class Todo(Base):
@@ -16,7 +16,7 @@ class Todo(Base):
     task = Column(String, nullable=False)
 
     # Defualt task status is pending
-    status = Column(String, default=Status.pending, index=True)
+    status = Column(String, default=Status.pending.value, index=True)
 
     # Setting the time the taske has being made
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -34,4 +34,4 @@ class Todo(Base):
     due_date = Column(DateTime(timezone=True), nullable=True, index=True)
 
     # optional task priority, default is 0
-    priority = Column(String, default="low", index=True)
+    priority = Column(String, default=Priority.low.value, index=True)

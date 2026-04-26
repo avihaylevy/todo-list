@@ -1,6 +1,30 @@
 # Todo List API
 
-A task manager API I built to practice Python backend development — REST API with filtering, pagination, and soft delete.
+A task manager REST API built with FastAPI and PostgreSQL. 
+Demonstrates clean architecture with separated layers, exception handling, 
+input validation, and automated testing.
+
+## Features
+
+- Full CRUD operations with validation
+- Soft delete + hard delete
+- Filtering by status, priority, due date
+- Pagination via cursor-based approach 
+- Custom exception handling with proper HTTP status codes
+- Input validation using Pydantic Enums
+- Health check endpoint
+- Containerized PostgreSQL via Docker Compose
+- Test suite using pytest with SQLite in-memory database
+
+## Architecture
+
+The project follows a layered architecture:
+- `main.py` — HTTP layer (FastAPI routes, exception handlers)
+- `logic.py` — Business logic
+- `models.py` — SQLAlchemy ORM models
+- `schemas.py` — Pydantic schemas for validation
+- `database.py` — DB connection and session management
+- `exceptions.py` — Custom exceptions
 
 ## Stack
 
@@ -52,7 +76,7 @@ uvicorn main:app --reload
 
 Open http://localhost:8000 for the UI or http://localhost:8000/docs for the API.
 
-## Running Tests
+## Testing
 
 ```bash
 pytest tests/ -v

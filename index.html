@@ -136,8 +136,8 @@
       <option value="task">מיון: אלפביתי</option>
     </select>
     <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">הכל</button>
-    <button class="filter-btn" id="filter-pending" onclick="setFilter('Pending')">פתוחות</button>
-    <button class="filter-btn" id="filter-Done" onclick="setFilter('Done')">בוצעו</button>
+    <button class="filter-btn" id="filter-pending" onclick="setFilter('pending')">פתוחות</button>
+    <button class="filter-btn" id="filter-Done" onclick="setFilter('done')">בוצעו</button>
     <button class="filter-btn" id="filter-soon" onclick="setDueSoonFilter()">⏰ עד 3 ימים</button>
     <select class="toolbar-select" id="priority-filter" onchange="setPriorityFilter(this.value)">
       <option value="">עדיפות: הכל</option>
@@ -215,7 +215,7 @@
     document.getElementById('label-done').textContent = t('done');
     document.getElementById('label-tasks').textContent = t('tasks');
     document.getElementById('filter-all').textContent = t('all');
-    document.getElementById('filter-pending').textContent = t('Pending');
+    document.getElementById('filter-pending').textContent = t('pending');
     document.getElementById('filter-Done').textContent = t('doneLabel');
     document.getElementById('filter-soon').textContent = t('dueSoon');
     const ps = document.getElementById('priority-select');
@@ -245,8 +245,8 @@
   function setFilter(f) {
     activeFilterStatus = f;
     document.getElementById('filter-all').classList.toggle('active', f === 'all');
-    document.getElementById('filter-pending').classList.toggle('active', f === 'Pending');
-    document.getElementById('filter-Done').classList.toggle('active', f === 'Done');
+    document.getElementById('filter-pending').classList.toggle('active', f === 'pending');
+    document.getElementById('filter-Done').classList.toggle('active', f === 'done');
     applyFilters();
   }
 
@@ -314,7 +314,7 @@
   function renderTasks(tasks) {
     const list = document.getElementById('task-list');
     const allTasks = window._tasks || [];
-    const done = allTasks.filter(t => t.status === 'Done').length;
+    const done = allTasks.filter(t => t.status === 'done').length;
     document.getElementById('stat-total').textContent = allTasks.length;
     document.getElementById('stat-done').textContent = done;
     document.getElementById('stat-open').textContent = allTasks.length - done;
@@ -326,7 +326,7 @@
 
     list.innerHTML = tasks.map(task => {
       const dueStatus = isDueStatus(task.due_date);
-      const isOverdue = dueStatus === 'overdue' && task.status !== 'Done';
+      const isOverdue = dueStatus === 'overdue' && task.status !== 'done';
       const priorityTag = task.priority
         ? `<span class="priority-tag ${task.priority}">${t(task.priority)}</span>` : '';
       const dueTag = task.due_date
@@ -334,14 +334,14 @@
             ${isOverdue ? t('overdue') : formatDate(task.due_date)}
            </span>` : '';
       return `
-        <div class="task-card ${task.status === 'Done' ? 'Done' : ''} ${isOverdue ? 'overdue' : ''}" onclick="openModal(${task.id})">
-          <button class="check-btn ${task.status === 'Done' ? 'checked' : ''}" onclick="event.stopPropagation(); markDone(${task.id})"></button>
+        <div class="task-card ${task.status === 'done' ? 'done' : ''} ${isOverdue ? 'overdue' : ''}" onclick="openModal(${task.id})">
+          <button class="check-btn ${task.status === 'done' ? 'checked' : ''}" onclick="event.stopPropagation(); markDone(${task.id})"></button>
           <div class="task-info">
             <div class="task-title">${task.task}</div>
             <div class="task-meta">${priorityTag}${dueTag}</div>
           </div>
-          <span class="status-tag ${task.status === 'Done' ? 'Done' : 'Pending'}">
-            ${task.status === 'Done' ? t('doneLabel') : t('Pending')}
+          <span class="status-tag ${task.status === 'done' ? 'done' : 'pending'}">
+            ${task.status === 'done' ? t('doneLabel') : t('pending')}
           </span>
           <button class="del-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">✕</button>
         </div>`;
@@ -428,7 +428,7 @@
 
     document.getElementById('modal-title').textContent = task.task;
     const dueStatus = isDueStatus(task.due_date);
-    const isOverdue = dueStatus === 'overdue' && task.status !== 'Done';
+    const isOverdue = dueStatus === 'overdue' && task.status !== 'done';
 
     document.getElementById('modal-body').innerHTML = `
       <div class="modal-field">
@@ -438,8 +438,8 @@
       <div class="modal-field">
         <div class="modal-label">${t('status')}</div>
         <div class="modal-value">
-          <span class="status-tag ${task.status === 'Done' ? 'Done' : 'Pending'}">
-            ${task.status === 'Done' ? t('doneLabel') : t('Pending')}
+          <span class="status-tag ${task.status === 'done' ? 'done' : 'pending'}">
+            ${task.status === 'done' ? t('doneLabel') : t('pending')}}
           </span>
         </div>
       </div>
@@ -467,7 +467,7 @@
       </div>`;
 
     document.getElementById('modal-actions').innerHTML = `
-      ${task.status !== 'Done'
+      ${task.status !== 'done'
         ? `<button class="btn-done" onclick="markDone(${task.id})">${t('markDone')}</button>`
         : `<button class="btn-reopen" onclick="reopenTask(${task.id})">${t('reopen')}</button>`}
       <button class="btn-soft" onclick="softDelete(${task.id})">${t('softDelete')}</button>

@@ -38,11 +38,11 @@ def add_task(
 # View a task function from database, with oprional status filter and pagnation
 def view_task(
         db: Session,
-        status: str = None,
+        status: Status | None = None,
         after_id: int = 0,
         limit: int = 10,
         order_by: str = "created_at",
-        priority: str = None,
+        priority: Priority | None = None,
         due_date: datetime | None = None,
         due_soon: bool = False,
         is_deleted: bool = False):
@@ -99,7 +99,7 @@ def update_task(
         task: str | None = None,
         description: str | None = None,
         due_date: datetime | None = None,
-        priority: str | None = None):
+        priority: Priority | None = None):
     existing_task = db.query(Todo).filter(Todo.id == task_id).first()
     if not existing_task:
         raise TaskNotFoundException()
